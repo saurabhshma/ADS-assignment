@@ -10,6 +10,7 @@ int maxHeight;
 typedef struct Node
 {
 	int value;
+	int height;
 	struct Node *top;
 	struct Node *down;
 	struct Node *left;
@@ -28,10 +29,10 @@ int getrand()
 
 node* createNew()
 {
-	node* temp1 = new (node);
-	node* temp2 = new (node);
-	node* temp3 = new (node);
-	node* temp4 = new (node);
+	node* temp1 = new (node); //bottom left
+	node* temp2 = new (node); //bottom left
+	node* temp3 = new (node); //top left
+	node* temp4 = new (node); //top right
 	temp1->value = INT_MIN;
 	temp1->top = temp3;
 	temp1->down = NULL;
@@ -73,7 +74,7 @@ void display()
 	}
 }
 
-node* search(int key)
+node* search_aux(int key)
 {
 	node *temp = skiplist;
 	while(temp->down != NULL)
@@ -108,63 +109,130 @@ node* insert_aux(int key, node **after, node **above)
 
 void insert(int key)
 {
-	//srand(rand_num);
-	int x = 0;
 	node *temp;
-	while(getrand() != 0)
-		x++;
-	cout << x << "\n";;
-	if(x > (maxHeight - 1))
+	temp = search_aux(key);
+	if(temp->value == key)
+	{	
+		cout << "fa\n";
+	}
+	else
 	{
-		for(int i = 0; i < (x - (maxHeight - 1)); i++)
+		int x = 0;
+		while(getrand() != 0)
+			x++;
+		cout << x << "\n";;
+		if(x > (maxHeight - 1))
 		{
-			temp = skiplist;
-			node *temp1 = new node;
-			node *temp2 = new node;
-			temp1->value = INT_MIN;
-			temp1->top = NULL;
-			temp1->down	= temp;
-			temp1->left = NULL;
-			temp2->value = INT_MAX;
-			temp2->top = NULL;
-			temp2->right = NULL;
-			temp1->right = temp2;
-			temp2->left = temp1;
-			temp->top = temp1;
-			temp->right->top = temp2;
-			temp2->down = temp->right;
-			skiplist = temp1;
+			for(int i = 0; i < (x - (maxHeight - 1)); i++)
+			{
+				temp = skiplist;
+				node *temp1 = new node;
+				node *temp2 = new node;
+				temp1->value = INT_MIN;
+				temp1->top = NULL;
+				temp1->down	= temp;
+				temp1->left = NULL;
+				temp2->value = INT_MAX;
+				temp2->top = NULL;
+				temp2->right = NULL;
+				temp1->right = temp2;
+				temp2->left = temp1;
+				temp->top = temp1;
+				temp->right->top = temp2;
+				temp2->down = temp->right;
+				skiplist = temp1;
+			}
+			maxHeight = x + 1;
 		}
-		maxHeight = x + 1;
+		temp = search_aux(key);
+		node *node_aux = insert_aux(key, &temp, NULL);
+		node *temp1 = node_aux;
+		temp = node_aux;
+		
+		while(x > 0)
+		{
+			while(temp->top == NULL)
+			{	
+				temp = temp->left;
+			}
+			temp = temp->top;
+			temp1 = insert_aux(key, &temp, &temp1);
+			temp = temp1;
+			x--;
+		}
 	}
-	temp = search(key);
-	node *node_aux = insert_aux(key, &temp, NULL);
-	node *temp1 = node_aux;
-	temp = node_aux;
-	
-	while(x > 0)
+}
+
+void search(int key)
+{
+	node *temp = search_aux(key);
+	if(temp->value == key)
 	{
-		while(temp->top == NULL)
-		{	
-			temp = temp->left;
-		}
-		temp = temp->top;
-		temp1 = insert_aux(key, &temp, &temp1);
-		temp = temp1;
-		x--;
+		cout << "f\n";
 	}
-	rand_num = rand();
+	else
+	{
+		cout << "nf\n";
+	}
+}
+
+void delete_aux(node *temp)
+{
+	temp->left->right = temp->right;
+	temp->right->left = temp->left;
+	delete temp;
+	temp = NULL;
+}
+
+void cleanup()
+{
+	node *temp, *temp1, *temp2;
+	temp = skiplist;
+	while(temp->down->right == temp->right->down)
+	{
+		temp1 = temp->down;
+		temp2 = temp->right;
+		delete(temp);
+		delete(temp2);
+		temp = NULL;
+		temp2 = NULL;
+		skiplist = temp1;
+		temp = skiplist;
+	}
+}
+
+void deleteNode(int key)
+{
+	node *temp = search_aux(key);
+	node *temp2;
+	if(temp->value != key)
+		cout << "nf\n";
+	else
+	{
+		while(temp != NULL)
+		{
+			temp2 = temp->top;
+			delete_aux(temp);
+			temp = temp2;
+		}
+	}
+	cleanup();
 }
 
 int main()
 {
 	createNew();
+	display();
+	insert(0);
 	insert(0);
 	insert(1);
 	insert(2);
 	insert(3);
 	insert(4);
-	//cout << maxHeight << "\n";
 	display();
+	deleteNode(0);
+	display();
+	//cout << maxHeight << "\n";
+	//display();
 	return 0;
 }
