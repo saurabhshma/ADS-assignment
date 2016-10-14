@@ -166,6 +166,121 @@ void rightRotation(node *temp)
 	heightFixUp(leftChild);	 
 }
 
+node* inorderSuccessor(node *temp)
+{
+	temp = temp->right;
+	while(temp->left != NULL)
+	{	
+		temp = temp->left;
+	}
+	return (temp);
+}
+
+void nodeDelete(int key)
+{
+	node *temp2;
+	node *temp = search_aux(key);
+	if(temp->value != key)
+		cout << "nf\n";
+	else
+	{
+		if(temp->left == NULL && temp->right == NULL)
+		{	
+			temp2 = temp->parent;
+			if(temp->parent->left == temp)
+				temp->parent->left = NULL;
+			else
+				temp->parent->right = NULL; 
+		}
+		else if(temp->left == NULL && temp->right != NULL)
+		{
+			temp2 = temp->parent;
+			if(temp->parent->right == temp)
+			{	
+				temp->right->parent = temp->parent;
+				temp->parent->right = temp->right;
+			}
+			else
+			{
+				temp->right->parent = temp->parent;
+				temp->parent->left = temp->right;
+			}
+		}
+		else if(temp->left != NULL && temp->right == NULL)
+		{
+			temp2 = temp->parent;
+			if(temp->parent->right == temp)
+			{
+				temp->left->parent = temp->parent;
+				temp->parent->right = temp->left;
+			}
+			else
+			{
+				temp->left->parent = temp->parent;
+				temp->parent->left = temp->left;	
+			}
+		}
+		else
+		{
+			node *temp1 = inorderSuccessor(temp);
+			temp2 = temp1->parent;
+			temp->value = temp1->value;
+			if(temp1->parent->right == temp1)
+			{		
+				temp1->parent->right = temp1->right;
+				temp1->right->parent = temp1->parent;
+			}
+			else
+			{
+				temp1->parent->left = temp1->right;
+				temp1->right->parent = temp1->parent;
+			}
+		}
+		node *temp3 = temp2;
+		while(temp2 != NULL)
+		{
+			setHeight(temp2);	
+			temp2 = temp2->parent;
+		}
+		while(temp3 != NULL)
+		{
+			if(getBalance(temp3) < 2 && getBalance(temp3) > -2)
+				temp3 = temp3->parent;
+			else	
+			{	
+				if(getBalance(temp3) == 2)
+				{
+					if(key < temp3->left->value)
+					{	
+						rightRotation(temp3);
+					}
+					else
+					{
+						if(key > temp3->left->value)
+						{
+							leftRotation(temp3->left);
+							rightRotation(temp3);
+						}
+					}
+				}
+				else
+				{
+					if(key > temp3->right->value)
+						leftRotation(temp3);
+					else
+					{
+						if(key < temp3->right->value)
+						{
+							rightRotation(temp3->right);
+							leftRotation(temp3);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 void insert(int key)
 {
 	node *temp, *temp1;
@@ -246,20 +361,31 @@ void display(node *temp)
 int main()
 {
 	insert(4);
-	insert(1);
-	insert(5);
-	display(root);
-	cout << "\n";
-	insert(2);
+	insert(10);
+	insert(15);
 	display(root);
 	cout << "\n";
 	insert(3);
 	display(root);
 	cout << "\n";
-	/*insert(-2);
+	insert(7);
 	display(root);
 	cout << "\n";
-	insert(2);
+	insert(5);
+	display(root);
+	cout << "\n";
+	insert(8);
+	display(root);
+	cout << "\n";
+	insert(9);
+	display(root);
+	cout << "\n";
+	nodeDelete(7);
+	display(root);
+	cout << "\n";
+	//node *temp = inorderSuccessor(root);
+	//cout << "inorderSuccessor: " << temp->value << "\n"; 
+	/*insert(2);
 	display(root);
 	cout << "\n";
 	insert(3);
