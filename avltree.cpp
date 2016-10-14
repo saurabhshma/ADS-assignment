@@ -66,9 +66,75 @@ int getBalance(node* temp)
 		return(temp->left->height - temp->right->height);
 }	
 
+void heightFixUp(node *temp)
+{
+	node *tempParent = temp->parent;
+	while(tempParent != NULL)
+	{
+		tempParent->height = temp->height + 1;
+		temp = tempParent;
+		tempParent = tempParent->parent;
+	}
+}
+
+int max(int a, int b)
+{
+	if(a > b)
+		return a;
+	else
+		return b;
+}
+
+void setHeight(node *temp)
+{
+	if(temp->left != NULL && temp->right != NULL)
+		temp->height = 1 + max(temp->left->height, temp->right->height);
+	else if(temp->left == NULL && temp->right != NULL)
+		temp->height = 1 + temp->right->height;
+	else if(temp->left != NULL && temp->right == NULL)
+		temp->height = 1 + temp->left->height; 
+	else if(temp->left == NULL && temp->right == NULL)
+		temp->height = 0;
+
+}
+
+void leftRotation(node *temp)
+{}
+
+void rightRotation(node *temp)
+{
+	node *tempParent, *leftChild, *left_rightChild;
+	tempParent = temp->parent;
+	leftChild = temp->left;
+	left_rightChild = temp->left->right;
+	if(tempParent == NULL)
+	{
+		root = leftChild;
+		temp->left->parent = temp->parent;
+		leftChild->right = temp;
+		temp->parent = leftChild;
+		temp->left = left_rightChild;
+		if(left_rightChild != NULL)
+			left_rightChild->parent = temp;	
+	}
+	else
+	{
+		temp->left->parent = temp->parent;
+		temp->parent->left = leftChild;
+		leftChild->right = temp;
+		temp->parent = leftChild;
+		temp->left = left_rightChild;
+		if(left_rightChild != NULL)
+			left_rightChild->parent = temp;	
+	}
+	setHeight(temp);
+	setHeight(leftChild);
+	heightFixUp(leftChild);	 
+}
+
 void insert(int key)
 {
-	node *temp;
+	node *temp, *temp1;
 	if(root == NULL)
 		root = createNode(key);
 	else
@@ -80,35 +146,52 @@ void insert(int key)
 		{
 			if(key < temp->value)
 			{
-				node *temp1 = createNode(key);
+				temp1 = createNode(key);
 				temp->left = temp1;
 				temp1->parent = temp;
-				while(temp != NULL)
-				{
-					if(temp1->height + 1 == temp->height)
-						break;
-					else	
-					{	
-						(temp->height)++;
-						temp1 = temp;
-						temp = temp->parent;
-					}
-				}
 			}
 			else
 			{
-				node *temp1 = createNode(key);
+				temp1 = createNode(key);
 				temp->right = temp1;
 				temp1->parent = temp;
-				while(temp != NULL)
-				{
-					if(temp1->height + 1 == temp->height)
-						break;
-					else	
-					{	
-						(temp->height)++;
-						temp1 = temp;
-						temp = temp->parent;
+			}
+			heightFixUp(temp1);
+			while(temp != NULL)
+			{
+				if(getBalance(temp) < 2 && getBalance(temp) > -2)
+					temp = temp->parent;
+				else	
+				{	
+					if(getBalance(temp) == 2)
+					{
+						if(key < temp->left->value)
+						{	
+							rightRotation(temp);
+							temp = NULL;
+						}
+						else
+						{
+							if(key > temp->left->value)
+							{
+								leftRotation(temp->left);
+								rightRotation(temp);
+								temp = NULL;
+							}
+						}
+					}
+					else
+					{
+						if(key > temp->right->value)
+							leftRotation(temp);
+						else
+						{
+							if(key < temp->right->value)
+							{
+								rightRotation(temp->right);
+								leftRotation(temp);
+							}
+						}
 					}
 				}
 			}
@@ -130,12 +213,17 @@ int main()
 {
 	insert(5);
 	insert(3);
-	insert(6);
+	display(root);
+	cout << "\n";
 	insert(1);
-	insert(4);
-	insert(7);
-	insert(2);
-	insert(9);
+	display(root);
+	cout << "\n";
+	insert(-1);
+	display(root);
+	cout << "\n";
+	insert(-2);
+	display(root);
+	cout << "\n";
 	/*insert(5);
 	node *temp1 = new node;
 	node *temp2 = new node;
@@ -153,7 +241,7 @@ int main()
 	cout << "\n";
 	search(0);
 	search(4);*/
-	display(root);
-	cout << "\n";
+	//display(root);
+	//cout << "\n";
 	return 0;
 }
