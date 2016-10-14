@@ -99,7 +99,38 @@ void setHeight(node *temp)
 }
 
 void leftRotation(node *temp)
-{}
+{
+	node *tempParent, *rightChild, *right_leftChild;
+	tempParent = temp->parent;
+	rightChild = temp->right;
+	right_leftChild = temp->right->left;
+	if(tempParent == NULL)
+	{
+		root = rightChild;
+		temp->right->parent = temp->parent;
+		rightChild->left = temp;
+		temp->parent = rightChild;
+		temp->right = right_leftChild;
+		if(right_leftChild != NULL)
+			right_leftChild->parent = temp;
+	}
+	else
+	{
+		temp->right->parent = temp->parent;
+		if(temp->parent->right == temp)
+			temp->parent->right = rightChild;
+		else
+			temp->parent->left = rightChild;
+		rightChild->left = temp;
+		temp->parent = rightChild;
+		temp->right = right_leftChild;
+		if(right_leftChild != NULL)
+			right_leftChild->parent = temp;	
+	}
+	setHeight(temp);
+	setHeight(rightChild);
+	heightFixUp(rightChild);
+}
 
 void rightRotation(node *temp)
 {
@@ -120,7 +151,10 @@ void rightRotation(node *temp)
 	else
 	{
 		temp->left->parent = temp->parent;
-		temp->parent->left = leftChild;
+		if(temp->parent->left == temp)
+			temp->parent->left = leftChild;
+		else
+			temp->parent->right = leftChild;
 		leftChild->right = temp;
 		temp->parent = leftChild;
 		temp->left = left_rightChild;
@@ -211,19 +245,26 @@ void display(node *temp)
 
 int main()
 {
+	insert(4);
+	insert(1);
 	insert(5);
+	display(root);
+	cout << "\n";
+	insert(2);
+	display(root);
+	cout << "\n";
 	insert(3);
 	display(root);
 	cout << "\n";
-	insert(1);
+	/*insert(-2);
 	display(root);
 	cout << "\n";
-	insert(-1);
+	insert(2);
 	display(root);
 	cout << "\n";
-	insert(-2);
+	insert(3);
 	display(root);
-	cout << "\n";
+	cout << "\n";*/
 	/*insert(5);
 	node *temp1 = new node;
 	node *temp2 = new node;
